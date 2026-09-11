@@ -1,0 +1,24 @@
+# Production secrets / local configuration
+/config/config.php
+.env
+.env.*
+!.env.example
+
+# Runtime data
+/backups/
+/logs/
+/cache/
+/tmp/
+/uploads/private/
+*.log
+*.sql.gz
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dependencies (if added later)
+/vendor/
+/node_modules/
