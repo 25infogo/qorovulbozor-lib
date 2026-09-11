@@ -1,0 +1,44 @@
+name: PHP checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: PHP syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find . -type f -name '*.php' -print0)
+
+      - name: Ensure production config is not committed
+        shell: bash
+        run: |
+          test ! -f config/config.php || { echo 'ERROR: config/config.php must not be committed'; exit 1; }
+
+      - name: Basic secret-pattern check
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE --exclude-dir=.git --exclude='.env.example' --exclude='config.example.php' \
+            '(TELEGRAM_BOT_TOKEN=.{10,}|CLICK_SECRET_KEY=.{8,}|PAYME_KEY=.{8,}|DB_PASSWORD=.{8,})' .; then
+            echo 'Potential secret detected. Review before publishing.'
+            exit 1
+          fi
